@@ -162,7 +162,7 @@ class SEW():
 		except:
 			raise RuntimeError("Could not run SExtractor. Is the path '%s' correct ? If not, specify sexpath='/path/to/sextractor'" % self.sexpath)
 		out, err = p.communicate()
-		version_match = re.search("[Vv]ersion ([0-9\.])+", err.decode(encoding='UTF-8'))
+		version_match = re.search(r"[Vv]ersion (\d+(?:\.\d+)*)", err.decode(encoding='UTF-8'))
 		if version_match is False:
 			raise RuntimeError("Could not determine SExctractor version, check the output of running '%s'" % (self.sexpath))
 		version = str(version_match.group()[8:])
@@ -187,7 +187,7 @@ class SEW():
 		
 			# It could be that the param encapsulates several values (e.g., "FLUX_RADIUS(10)")
 			# So we have to dissect this
-			match = re.compile("(\w*)\(\d*\)").match(param)
+			match = re.match(r"(\w+)\(\d+\)", param)
 			if match:
 				cleanparam = match.group(1)
 			else:
@@ -1327,5 +1327,5 @@ class SEW():
 """
 
 	# We turn this text block into a list of the parameter names:
-	fullparamlist = list(map(lambda s: s[1:-1], re.compile("#\w*\s").findall(fullparamtxt)))
+	fullparamlist = re.findall(r"#(\w+)", fullparamtxt)
 
