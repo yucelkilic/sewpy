@@ -315,9 +315,10 @@ class SEW():
 		if force or not os.path.exists(self._get_config_filepath()):	
 			p = subprocess.Popen([self.sexpath, "-dd"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 			out, err = p.communicate()
-			if err != "":
-				logger.warning("Ouch, SExtractor complains :")
-				logger.warning(err)
+			err_str = err.decode(encoding='utf-8', errors='ignore').strip()
+			if err_str:
+						logger.warning("Ouch, SExtractor complains :")
+						logger.warning(err_str)
 			f = open(self._get_config_filepath(), 'w')
 			f.write(out.decode(encoding='UTF-8'))
 			f.close()
@@ -879,8 +880,12 @@ class SEW():
 		logger.info("SExtractor stderr:")
 		logger.info(err)
 		
-		if not "All done" in err.decode(encoding='UTF-8'):
-			logger.warning("Ouch, something seems wrong, check SExtractor log: %s" % self._get_log_filepath(imgname))
+		# if not "All done" in err.decode(encoding='UTF-8'):
+		# 	logger.warning("Ouch, something seems wrong, check SExtractor log: %s" % self._get_log_filepath(imgname))
+
+		log_file = self._get_log_filepath(imgname)
+		if not os.path.exists(log_file) or os.path.getsize(log_file) == 0:
+				logger.warning("SExtractor log is missing or empty: %s" % log_file)
 		
 		endtime = datetime.now()
 		logger.info("Running SExtractor done, it took %.2f seconds." % \
